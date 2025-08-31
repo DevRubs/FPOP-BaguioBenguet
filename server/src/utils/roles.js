@@ -1,6 +1,6 @@
 // Role hierarchy and permissions
 // Higher index => higher privilege
-export const ROLES = ['volunteer', 'doctor', 'staff', 'co_admin', 'admin']
+export const ROLES = ['user', 'volunteer', 'doctor', 'staff', 'co_admin', 'admin']
 
 export function hasAtLeastRole(userRole, requiredRole) {
   const a = ROLES.indexOf(userRole)
@@ -11,18 +11,18 @@ export function hasAtLeastRole(userRole, requiredRole) {
 // Tab-level permissions derived from your matrix
 // true => allowed, false => denied
 export const TAB_PERMISSIONS = {
-  Dashboard: { admin: true, co_admin: true, doctor: true, volunteer: true },
-  Users: { admin: true, co_admin: true, doctor: false, volunteer: false },
-  Homepage: { admin: true, co_admin: true, doctor: false, volunteer: false },
-  Resources: { admin: true, co_admin: true, doctor: true, volunteer: true },
-  Chat: { admin: true, co_admin: true, doctor: true, volunteer: true },
-  Schedule: { admin: true, co_admin: true, doctor: true, volunteer: true },
-  Volunteer: { admin: true, co_admin: true, doctor: false, volunteer: false },
-  About: { admin: true, co_admin: true, doctor: false, volunteer: false },
-  Youth: { admin: true, co_admin: true, doctor: false, volunteer: false },
+  Dashboard: { admin: true, co_admin: true, staff: true, doctor: true, volunteer: true, user: false },
+  Users: { admin: true, co_admin: true, staff: false, doctor: false, volunteer: false, user: false },
+  Homepage: { admin: true, co_admin: true, staff: false, doctor: false, volunteer: false, user: false },
+  Resources: { admin: true, co_admin: true, staff: true, doctor: true, volunteer: true, user: false },
+  Chat: { admin: true, co_admin: true, staff: true, doctor: true, volunteer: true, user: false },
+  Schedule: { admin: true, co_admin: true, staff: true, doctor: true, volunteer: true, user: false },
+  Volunteer: { admin: true, co_admin: true, staff: false, doctor: false, volunteer: false, user: false },
+  About: { admin: true, co_admin: true, staff: false, doctor: false, volunteer: false, user: false },
+  Youth: { admin: true, co_admin: true, staff: false, doctor: false, volunteer: false, user: false },
 }
 
-export const ALL_ROLES = ['admin', 'co_admin', 'doctor', 'volunteer']
+export const ALL_ROLES = ['admin', 'co_admin', 'staff', 'doctor', 'volunteer', 'user']
 
 export function buildPermissionsTable() {
   const roles = ALL_ROLES

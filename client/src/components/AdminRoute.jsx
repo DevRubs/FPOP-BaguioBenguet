@@ -3,8 +3,8 @@ import { useAuth } from '../context/AuthContext.jsx'
 
 export default function AdminRoute() {
   const { isAuthenticated, user } = useAuth()
-  const isAdmin = user?.role === 'admin'
-  if (!isAuthenticated || !isAdmin) {
+  const isAllowed = user?.role !== 'user'
+  if (!isAuthenticated || !isAllowed) {
     return <Navigate to="/" replace />
   }
   return <Outlet />
