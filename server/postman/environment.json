@@ -1,0 +1,22 @@
+{
+  "id": "a8e6e3a1-0000-4000-8000-000000000002",
+  "name": "Project B - Local",
+  "values": [
+    { "key": "baseUrl", "value": "http://localhost:5000", "type": "default" },
+    { "key": "name", "value": "Test User", "type": "default" },
+    { "key": "email", "value": "test@example.com", "type": "default" },
+    { "key": "password", "value": "Test@1234", "type": "default" },
+    { "key": "newPassword", "value": "Test@12345", "type": "default" },
+    { "key": "verifyToken", "value": "", "type": "default" },
+    { "key": "resetToken", "value": "", "type": "default" },
+    { "key": "userId", "value": "", "type": "default" },
+    { "key": "role", "value": "doctor", "type": "default" },
+    { "key": "adminEmail", "value": "admin@example.com", "type": "default" },
+    { "key": "adminPassword", "value": "Admin@1234", "type": "default" }
+  ],
+  "_postman_variable_scope": "environment",
+  "_postman_exported_at": "2025-01-01T00:00:00.000Z",
+  "_postman_exported_using": "Postman/10"
+}
+
+

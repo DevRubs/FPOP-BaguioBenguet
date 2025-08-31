@@ -1,0 +1,186 @@
+{
+  "info": {
+    "name": "Project B - Backend API",
+    "_postman_id": "a8e6e3a1-0000-4000-8000-000000000001",
+    "description": "Auth and User APIs for Project B. Uses JWT in httpOnly cookies. Import the matching environment file.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:5000" },
+    { "key": "name", "value": "Test User" },
+    { "key": "email", "value": "test@example.com" },
+    { "key": "password", "value": "Test@1234" },
+    { "key": "newPassword", "value": "Test@12345" },
+    { "key": "verifyToken", "value": "" },
+    { "key": "resetToken", "value": "" },
+    { "key": "userId", "value": "" },
+    { "key": "role", "value": "doctor" },
+    { "key": "adminEmail", "value": "admin@example.com" },
+    { "key": "adminPassword", "value": "Admin@1234" }
+  ],
+  "item": [
+    {
+      "name": "Auth (Step-by-step)",
+      "item": [
+        {
+          "name": "1) Register",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"{{name}}\",\n  \"email\": \"{{email}}\",\n  \"password\": \"{{password}}\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/api/auth/register", "host": ["{{baseUrl}}"], "path": ["api", "auth", "register"] }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Created (201)', function () {",
+                  "  pm.response.to.have.status(201);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "2) Resend Verification (optional)",
+          "request": {
+            "method": "POST",
+            "header": [ { "key": "Content-Type", "value": "application/json" } ],
+            "body": { "mode": "raw", "raw": "{\n  \"email\": \"{{email}}\"\n}" },
+            "url": { "raw": "{{baseUrl}}/api/auth/resend-verification", "host": ["{{baseUrl}}"], "path": ["api","auth","resend-verification"] }
+          },
+          "response": []
+        },
+        {
+          "name": "3) Verify Email (paste token in env)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/verify-email?token={{verifyToken}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api","auth","verify-email"],
+              "query": [ { "key": "token", "value": "{{verifyToken}}" } ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "4) Login",
+          "request": {
+            "method": "POST",
+            "header": [ { "key": "Content-Type", "value": "application/json" } ],
+            "body": { "mode": "raw", "raw": "{\n  \"email\": \"{{email}}\",\n  \"password\": \"{{password}}\"\n}" },
+            "url": { "raw": "{{baseUrl}}/api/auth/login", "host": ["{{baseUrl}}"], "path": ["api","auth","login"] }
+          },
+          "event": [
+            { "listen": "test", "script": { "type": "text/javascript", "exec": [
+              "if (pm.response.code === 200) {",
+              "  const json = pm.response.json();",
+              "  if (json && json.user) {",
+              "    pm.environment.set('userId', json.user.id);",
+              "    pm.environment.set('role', json.user.role);",
+              "  }",
+              "  pm.test('OK', function () { pm.response.to.have.status(200); });",
+              "} else if (pm.response.code === 403) {",
+              "  pm.test('Verify required', function () {",
+              "    pm.response.to.have.status(403);",
+              "    pm.expect(pm.response.json().verifyRequired).to.be.true;",
+              "  });",
+              "}"
+            ] } }
+          ]
+        },
+        {
+          "name": "(Admin) Login",
+          "request": {
+            "method": "POST",
+            "header": [ { "key": "Content-Type", "value": "application/json" } ],
+            "body": { "mode": "raw", "raw": "{\n  \"email\": \"{{adminEmail}}\",\n  \"password\": \"{{adminPassword}}\"\n}" },
+            "url": { "raw": "{{baseUrl}}/api/auth/login", "host": ["{{baseUrl}}"], "path": ["api","auth","login"] }
+          },
+          "response": []
+        },
+        {
+          "name": "5) Me",
+          "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/api/auth/me", "host": ["{{baseUrl}}"], "path": ["api","auth","me"] } },
+          "response": []
+        },
+        {
+          "name": "6) Permissions (current user)",
+          "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/api/auth/permissions", "host": ["{{baseUrl}}"], "path": ["api","auth","permissions"] } },
+          "event": [ { "listen": "test", "script": { "type": "text/javascript", "exec": [
+            "pm.test('OK', function () { pm.response.to.have.status(200); });",
+            "const json = pm.response.json();",
+            "pm.expect(json).to.have.property('allowedTabs');"
+          ] } } ]
+        },
+        {
+          "name": "7) Permissions Table (admin/co_admin)",
+          "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/api/auth/permissions/table", "host": ["{{baseUrl}}"], "path": ["api","auth","permissions","table"] } },
+          "response": []
+        },
+        {
+          "name": "8) Permissions Check (role + tab)",
+          "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/api/auth/permissions/check?role={{role}}&tab=Resources", "host": ["{{baseUrl}}"], "path": ["api","auth","permissions","check"], "query": [ { "key": "role", "value": "{{role}}" }, { "key": "tab", "value": "Resources" } ] } },
+          "response": []
+        },
+        {
+          "name": "9) Forgot Password",
+          "request": {
+            "method": "POST",
+            "header": [ { "key": "Content-Type", "value": "application/json" } ],
+            "body": { "mode": "raw", "raw": "{\n  \"email\": \"{{email}}\"\n}" },
+            "url": { "raw": "{{baseUrl}}/api/auth/forgot-password", "host": ["{{baseUrl}}"], "path": ["api","auth","forgot-password"] }
+          },
+          "response": []
+        },
+        {
+          "name": "10) Reset Password (paste token in env)",
+          "request": {
+            "method": "POST",
+            "header": [ { "key": "Content-Type", "value": "application/json" } ],
+            "body": { "mode": "raw", "raw": "{\n  \"token\": \"{{resetToken}}\",\n  \"password\": \"{{newPassword}}\"\n}" },
+            "url": { "raw": "{{baseUrl}}/api/auth/reset-password", "host": ["{{baseUrl}}"], "path": ["api","auth","reset-password"] }
+          },
+          "response": []
+        },
+        {
+          "name": "11) Logout",
+          "request": { "method": "POST", "url": { "raw": "{{baseUrl}}/api/auth/logout", "host": ["{{baseUrl}}"], "path": ["api","auth","logout"] } },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Users (admin/co_admin)",
+      "item": [
+        {
+          "name": "List Users",
+          "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/api/users", "host": ["{{baseUrl}}"], "path": ["api","users"] } },
+          "response": []
+        },
+        {
+          "name": "Update User Role",
+          "request": {
+            "method": "PATCH",
+            "header": [ { "key": "Content-Type", "value": "application/json" } ],
+            "body": { "mode": "raw", "raw": "{\n  \"role\": \"{{role}}\"\n}" },
+            "url": { "raw": "{{baseUrl}}/api/users/{{userId}}/role", "host": ["{{baseUrl}}"], "path": ["api","users","{{userId}}","role"] }
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}
+
+
