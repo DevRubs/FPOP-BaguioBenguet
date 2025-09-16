@@ -172,7 +172,7 @@ export default function Navbar() {
               <div className="flex flex-col gap-1 text-base font-semibold">
                 <Link to="/dashboard" className="rounded-md px-3 py-2 text-white/90 hover:bg-white/10" onClick={() => setMobileOpen(false)}>Profile</Link>
                 <Link to="/appointments" className="rounded-md px-3 py-2 text-white/90 hover:bg-white/10" onClick={() => setMobileOpen(false)}>Appointments</Link>
-                {user?.role === 'admin' && (
+                {user?.role && user.role !== 'user' && (
                   <Link to="/admin/dashboard" className="rounded-md px-3 py-2 text-white/90 hover:bg-white/10" onClick={() => setMobileOpen(false)}>Admin</Link>
                 )}
                 <button
@@ -242,7 +242,7 @@ function UserMenu({ user, onLogout }) {
             <Link to="/appointments" className="flex items-center gap-2 rounded-md px-2.5 py-1.5 hover:bg-slate-100" role="menuitem">
               <FiCalendarIcon /> Appointments
             </Link>
-            {user?.role === 'admin' && (
+            {user?.role && user.role !== 'user' && (
               <Link to="/admin/dashboard" className="flex items-center gap-2 rounded-md px-2.5 py-1.5 hover:bg-slate-100" role="menuitem">
                 <FiShieldIcon /> Admin
               </Link>
