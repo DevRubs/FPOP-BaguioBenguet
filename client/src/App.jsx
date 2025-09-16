@@ -25,6 +25,7 @@ const AdminAppointments = lazy(() => import('./pages/admin/appointments/AdminApp
 const AdminVolunteers = lazy(() => import('./pages/admin/volunteers/AdminVolunteers.jsx'))
 const AdminEvents = lazy(() => import('./pages/admin/events/AdminEvents.jsx'))
 const AdminResources = lazy(() => import('./pages/admin/resources/AdminResources.jsx'))
+const AdminUsers = lazy(() => import('./pages/admin/users/AdminUsers.jsx'))
 const AdminNotifications = lazy(() => import('./pages/admin/notifications/AdminNotifications.jsx'))
 import Login from './pages/auth/Login.jsx'
 import Register from './pages/auth/Register.jsx'
@@ -88,6 +89,7 @@ export default function App() {
           <Route path="volunteers" element={<Suspense fallback={<Loader />}><AdminVolunteers /></Suspense>} />
           <Route path="events" element={<Suspense fallback={<Loader />}><AdminEvents /></Suspense>} />
           <Route path="resources" element={<Suspense fallback={<Loader />}><AdminResources /></Suspense>} />
+          <Route path="users" element={<Suspense fallback={<Loader />}><AdminUsers /></Suspense>} />
           <Route path="notifications" element={<Suspense fallback={<Loader />}><AdminNotifications /></Suspense>} />
           {/* Admin 404 inside admin shell (optional: custom admin not found) */}
           <Route path="*" element={<Suspense fallback={<Loader />}><AdminDashboard /></Suspense>} />

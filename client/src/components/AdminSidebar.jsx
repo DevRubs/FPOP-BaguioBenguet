@@ -3,6 +3,7 @@ import { useAuth } from '../context/AuthContext.jsx'
 
 const adminNavItems = [
   { to: '/admin/dashboard', label: 'Dashboard' },
+  { to: '/admin/users', label: 'Users' },
   { to: '/admin/chatbot', label: 'Chatbot' },
   { to: '/admin/support-chat', label: 'Support Chat' },
   { to: '/admin/appointments', label: 'Appointments' },
@@ -12,8 +13,39 @@ const adminNavItems = [
   { to: '/admin/notifications', label: 'Notifications' },
 ]
 
+// true => allowed, false => denied
+const TAB_PERMISSIONS = {
+  Dashboard: { admin: true, co_admin: true, staff: true, doctor: true, volunteer: true, user: false },
+  Users: { admin: true, co_admin: false, staff: false, doctor: false, volunteer: false, user: false },
+  Resources: { admin: true, co_admin: true, staff: true, doctor: true, volunteer: true, user: false },
+  Chat: { admin: true, co_admin: true, staff: true, doctor: true, volunteer: true, user: false },
+  Schedule: { admin: true, co_admin: true, staff: true, doctor: true, volunteer: true, user: false },
+  Volunteer: { admin: true, co_admin: true, staff: false, doctor: false, volunteer: false, user: false },
+  About: { admin: true, co_admin: true, staff: false, doctor: false, volunteer: false, user: false },
+  Youth: { admin: true, co_admin: true, staff: false, doctor: false, volunteer: false, user: false },
+}
+
+// Map each sidebar item to a permission tab
+const ITEM_TO_TAB = {
+  'Dashboard': 'Dashboard',
+  'Users': 'Users',
+  'Chatbot': 'Chat',
+  'Support Chat': 'Chat',
+  'Appointments': 'Schedule',
+  'Volunteers': 'Volunteer',
+  'Events': 'Dashboard',
+  'Resources': 'Resources',
+  'Notifications': 'Dashboard',
+}
+
+function canRoleAccessTab(role, tab) {
+  const tabPerm = TAB_PERMISSIONS[tab]
+  if (!tabPerm) return false
+  return Boolean(tabPerm[role])
+}
+
 export default function AdminSidebar({ onNavigate }) {
-  const { logout } = useAuth()
+  const { logout, user } = useAuth()
   const navigate = useNavigate()
 
   const handleLogout = () => {
@@ -25,7 +57,7 @@ export default function AdminSidebar({ onNavigate }) {
   return (
     <nav className="h-full w-full p-3 md:p-4 flex min-h-0 flex-col overflow-hidden bg-white text-slate-900">
       <ul className="space-y-1 flex-1 overflow-y-auto pr-1">
-        {adminNavItems.map((item) => (
+        {adminNavItems.filter((item) => canRoleAccessTab(user?.role || 'user', ITEM_TO_TAB[item.label])).map((item) => (
           <li key={item.to}>
             <NavLink
               to={item.to}
