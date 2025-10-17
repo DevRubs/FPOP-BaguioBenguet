@@ -93,16 +93,6 @@ export async function adminUpdateStatus(req, res, next) {
   }
 }
 
-export async function adminUpdateNotes(req, res, next) {
-  try {
-    const { id } = req.params
-    const { notes } = req.body
-    const app = await VolunteerApplication.findByIdAndUpdate(id, { notes: notes || '' }, { new: true })
-    if (!app) return res.status(404).json({ message: 'Not found' })
-    res.json({ application: app })
-  } catch (err) {
-    next(err)
-  }
-}
+// Notes functionality removed
 
 

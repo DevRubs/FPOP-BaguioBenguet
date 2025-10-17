@@ -114,7 +114,7 @@ export default function AdminLayout() {
             <div className="text-sm text-slate-700">Admin</div>
           </div>
 
-          <div className="p-4 md:p-6">
+          <div className="px-4 md:px-8 py-8 md:py-12">
             <Outlet />
           </div>
         </main>

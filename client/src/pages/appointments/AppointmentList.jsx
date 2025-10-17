@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { FiPlus, FiCalendar, FiClock, FiMapPin, FiChevronRight, FiSearch } from 'react-icons/fi'
+import { FiPlus, FiCalendar, FiClock, FiMapPin, FiSearch } from 'react-icons/fi'
 import { api } from '../../api.js'
 
 export default function AppointmentList() {
@@ -10,6 +10,7 @@ export default function AppointmentList() {
 	const [loading, setLoading] = useState(true)
 	const [error, setError] = useState('')
 	const [items, setItems] = useState([])
+	const [cancellingId, setCancellingId] = useState(null)
 
 	useEffect(() => {
 		let mounted = true
@@ -40,6 +41,26 @@ export default function AppointmentList() {
 			return textOk && typeOk
 		})
 	}, [items, query, type])
+
+	const handleCancel = async (appointmentId) => {
+		if (cancellingId) return // Prevent multiple clicks
+		if (!confirm('Are you sure you want to cancel this appointment?')) return
+		
+		setCancellingId(appointmentId)
+		try {
+			await api.post(`/api/appointments/${appointmentId}/cancel`)
+			// Update local state to reflect cancellation
+			setItems(prev => prev.map(item => 
+				item._id === appointmentId 
+					? { ...item, status: 'cancelled' }
+					: item
+			))
+		} catch (err) {
+			alert(err?.message || 'Failed to cancel appointment')
+		} finally {
+			setCancellingId(null)
+		}
+	}
 
 	return (
 		<section className="px-4 md:px-8 py-8 md:py-12 font-friendly">
@@ -102,7 +123,7 @@ export default function AppointmentList() {
 						</div>
 					)}
 					{filtered.map((a) => (
-						<AppointmentCard key={a._id} appt={a} />
+						<AppointmentCard key={a._id} appt={a} onCancel={handleCancel} cancellingId={cancellingId} />
 					))}
 				</div>
 			</div>
@@ -125,7 +146,10 @@ function statusStyle(status) {
 	}
 }
 
-function AppointmentCard({ appt }) {
+function AppointmentCard({ appt, onCancel, cancellingId }) {
+	const isCancelling = cancellingId === appt._id
+	const canCancel = appt.status !== 'cancelled' && appt.status !== 'completed'
+
 	return (
 		<article className="rounded-2xl border border-[#65A3FA] bg-white shadow-lg p-4 md:p-5">
 			<div className="flex items-start justify-between gap-4">
@@ -139,11 +163,19 @@ function AppointmentCard({ appt }) {
 					</div>
 				</div>
 				<div className="flex items-center gap-2 shrink-0">
-					<Link to={`/appointments/${appt._id}`} className="inline-flex items-center gap-1 rounded-md border border-slate-300 bg-white px-3 py-2 text-slate-700 hover:bg-slate-50">
-						Details <FiChevronRight />
-					</Link>
-					<button className="inline-flex items-center gap-1 rounded-md border border-slate-300 bg-white px-3 py-2 text-slate-700 hover:bg-slate-50">Reschedule</button>
-					<button className="inline-flex items-center gap-1 rounded-md border border-rose-200 bg-rose-50 px-3 py-2 text-rose-700 hover:bg-rose-100">Cancel</button>
+					{canCancel && (
+						<button 
+							onClick={() => onCancel(appt._id)}
+							disabled={isCancelling}
+							className={`inline-flex items-center gap-1 rounded-md border px-3 py-2 font-semibold transition-colors ${
+								isCancelling 
+									? 'border-rose-200 bg-rose-50 text-rose-400 cursor-not-allowed' 
+									: 'border-rose-200 bg-rose-50 text-rose-700 hover:bg-rose-100'
+							}`}
+						>
+							{isCancelling ? 'Cancelling...' : 'Cancel'}
+						</button>
+					)}
 				</div>
 			</div>
 		</article>

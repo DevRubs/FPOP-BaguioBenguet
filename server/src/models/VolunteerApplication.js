@@ -12,7 +12,6 @@ const volunteerApplicationSchema = new mongoose.Schema(
     skills: { type: [String], default: [] },
     motivation: { type: String, default: '' },
     status: { type: String, enum: ['pending', 'approved', 'rejected', 'withdrawn'], default: 'pending', index: true },
-    notes: { type: String, default: '' }, // admin notes
   },
   { timestamps: true }
 )
