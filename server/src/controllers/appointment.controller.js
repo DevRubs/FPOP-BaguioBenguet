@@ -1,5 +1,7 @@
 import Appointment from '../models/Appointment.js'
 import Notification from '../models/Notification.js'
+import User from '../models/User.js'
+import { sendAppointmentCreatedEmail, sendAppointmentCancelledEmail, sendAppointmentStatusEmail } from '../services/email.service.js'
 
 function isSunday(date) {
   return date.getUTCDay() === 0
@@ -40,6 +42,14 @@ export async function createAppointment(req, res, next) {
       body: `We received your ${type} request for ${new Date(startAt).toLocaleString()}.`,
       meta: { appointmentId: appt._id, kind: 'appointment_created' },
     })
+
+    // Fire-and-forget email (do not block response)
+    ;(async () => {
+      try {
+        const u = await User.findById(req.user.id).select('email')
+        if (u?.email) await sendAppointmentCreatedEmail({ to: u.email, appointment: appt })
+      } catch {}
+    })()
 
     res.status(201).json({ appointment: appt })
   } catch (err) {
@@ -86,6 +96,14 @@ export async function cancelMyAppointment(req, res, next) {
       body: `Your appointment on ${new Date(appt.startAt).toLocaleString()} was cancelled.`,
       meta: { appointmentId: appt._id, kind: 'appointment_cancelled' },
     })
+
+    // Fire-and-forget email
+    ;(async () => {
+      try {
+        const u = await User.findById(req.user.id).select('email')
+        if (u?.email) await sendAppointmentCancelledEmail({ to: u.email, appointment: appt })
+      } catch {}
+    })()
     res.json({ appointment: appt })
   } catch (err) {
     next(err)
@@ -126,6 +144,14 @@ export async function adminUpdateAppointmentStatus(req, res, next) {
       body: `Your appointment on ${new Date(appt.startAt).toLocaleString()} is now ${status}.`,
       meta: { appointmentId: appt._id, kind: 'appointment_status', status },
     })
+
+    // Fire-and-forget email
+    ;(async () => {
+      try {
+        const u = await User.findById(appt.user).select('email')
+        if (u?.email) await sendAppointmentStatusEmail({ to: u.email, appointment: appt, status })
+      } catch {}
+    })()
 
     res.json({ appointment: appt })
   } catch (err) {

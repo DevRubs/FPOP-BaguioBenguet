@@ -18,6 +18,7 @@ export default function AdminAppointments() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [status, setStatus] = useState('all')
+  const [updatingById, setUpdatingById] = useState({})
 
   useEffect(() => {
     let mounted = true
@@ -41,11 +42,19 @@ export default function AdminAppointments() {
   }, [status])
 
   async function updateStatus(id, newStatus) {
+    // Guard: prevent duplicate clicks and no-op updates
+    if (updatingById[id]) return
+    const current = items.find((it) => it._id === id)
+    if (current && current.status === newStatus) return
+
+    setUpdatingById((m) => ({ ...m, [id]: true }))
     try {
       await api.patch(`/api/appointments/admin/${id}/status`, { status: newStatus })
       setItems((prev) => prev.map((it) => (it._id === id ? { ...it, status: newStatus } : it)))
     } catch (err) {
       alert(err?.message || 'Failed to update')
+    } finally {
+      setUpdatingById((m) => ({ ...m, [id]: false }))
     }
   }
 
@@ -96,9 +105,27 @@ export default function AdminAppointments() {
                 <td className="px-3 py-2"><StatusBadge status={it.status} /></td>
                 <td className="px-3 py-2">
                   <div className="inline-flex items-center gap-2">
-                    <button onClick={() => updateStatus(it._id, 'confirmed')} className="rounded border border-emerald-200 bg-emerald-50 px-2 py-1 text-emerald-700">Confirm</button>
-                    <button onClick={() => updateStatus(it._id, 'completed')} className="rounded border border-slate-300 bg-slate-100 px-2 py-1 text-slate-700">Complete</button>
-                    <button onClick={() => updateStatus(it._id, 'cancelled')} className="rounded border border-rose-200 bg-rose-50 px-2 py-1 text-rose-700">Cancel</button>
+                    <button
+                      onClick={() => updateStatus(it._id, 'confirmed')}
+                      disabled={Boolean(updatingById[it._id]) || it.status !== 'pending'}
+                      className={`rounded border px-2 py-1 ${it.status === 'pending' ? 'border-emerald-200 bg-emerald-50 text-emerald-700' : 'border-emerald-100 bg-emerald-50/70 text-emerald-400'} ${updatingById[it._id] ? 'opacity-60 cursor-not-allowed' : ''}`}
+                    >
+                      {updatingById[it._id] ? 'Updating…' : 'Confirm'}
+                    </button>
+                    <button
+                      onClick={() => updateStatus(it._id, 'completed')}
+                      disabled={Boolean(updatingById[it._id]) || it.status !== 'confirmed'}
+                      className={`rounded border px-2 py-1 ${it.status === 'confirmed' ? 'border-slate-300 bg-slate-100 text-slate-700' : 'border-slate-200 bg-slate-100/70 text-slate-400'} ${updatingById[it._id] ? 'opacity-60 cursor-not-allowed' : ''}`}
+                    >
+                      {updatingById[it._id] ? 'Updating…' : 'Complete'}
+                    </button>
+                    <button
+                      onClick={() => updateStatus(it._id, 'cancelled')}
+                      disabled={Boolean(updatingById[it._id]) || it.status === 'completed' || it.status === 'cancelled'}
+                      className={`rounded border px-2 py-1 ${it.status === 'completed' || it.status === 'cancelled' ? 'border-rose-200 bg-rose-50/70 text-rose-400' : 'border-rose-200 bg-rose-50 text-rose-700'} ${updatingById[it._id] ? 'opacity-60 cursor-not-allowed' : ''}`}
+                    >
+                      {updatingById[it._id] ? 'Updating…' : 'Cancel'}
+                    </button>
                   </div>
                 </td>
               </tr>

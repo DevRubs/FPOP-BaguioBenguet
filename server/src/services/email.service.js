@@ -52,4 +52,67 @@ export async function sendVerificationEmail({ to, code }) {
   })
 }
 
+function formatDateTime(dt) {
+  try { return new Date(dt).toLocaleString() } catch { return String(dt) }
+}
+
+export async function sendAppointmentCreatedEmail({ to, appointment }) {
+  const baseUrl = process.env.FRONTEND_BASE_URL || 'http://localhost:5173'
+  const link = `${baseUrl}/appointments`
+  const transporter = createTransporter()
+  await transporter.sendMail({
+    from: process.env.EMAIL_FROM || 'no-reply@example.com',
+    to,
+    subject: 'Appointment request received',
+    html: `
+      <p>We received your appointment request.</p>
+      <p><b>Type:</b> ${appointment.type}<br/>
+         <b>When:</b> ${formatDateTime(appointment.startAt)}<br/>
+         <b>Location:</b> ${appointment.location}
+      </p>
+      <p>You can view your appointments here: <a href="${link}">${link}</a></p>
+    `,
+  })
+}
+
+export async function sendAppointmentCancelledEmail({ to, appointment }) {
+  const baseUrl = process.env.FRONTEND_BASE_URL || 'http://localhost:5173'
+  const link = `${baseUrl}/appointments`
+  const transporter = createTransporter()
+  await transporter.sendMail({
+    from: process.env.EMAIL_FROM || 'no-reply@example.com',
+    to,
+    subject: 'Appointment cancelled',
+    html: `
+      <p>Your appointment has been cancelled.</p>
+      <p><b>Type:</b> ${appointment.type}<br/>
+         <b>When:</b> ${formatDateTime(appointment.startAt)}<br/>
+         <b>Location:</b> ${appointment.location}
+      </p>
+      <p>You can view your appointments here: <a href="${link}">${link}</a></p>
+    `,
+  })
+}
+
+export async function sendAppointmentStatusEmail({ to, appointment, status }) {
+  const baseUrl = process.env.FRONTEND_BASE_URL || 'http://localhost:5173'
+  const link = `${baseUrl}/appointments`
+  const transporter = createTransporter()
+  const subject = `Appointment ${status}`
+  await transporter.sendMail({
+    from: process.env.EMAIL_FROM || 'no-reply@example.com',
+    to,
+    subject,
+    html: `
+      <p>Your appointment status has been updated.</p>
+      <p><b>Status:</b> ${status}<br/>
+         <b>Type:</b> ${appointment.type}<br/>
+         <b>When:</b> ${formatDateTime(appointment.startAt)}<br/>
+         <b>Location:</b> ${appointment.location}
+      </p>
+      <p>Manage your appointments here: <a href="${link}">${link}</a></p>
+    `,
+  })
+}
+
 
