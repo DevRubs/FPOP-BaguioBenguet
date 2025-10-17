@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { FiHeart, FiBook, FiUsers, FiUser, FiPhone, FiMail } from 'react-icons/fi'
+import { api } from '../../api.js'
 
 export default function VolunteerSignup() {
 	const [form, setForm] = useState({
@@ -13,15 +14,29 @@ export default function VolunteerSignup() {
 
 	const update = (key) => (e) => setForm((f) => ({ ...f, [key]: e.target.value }))
 
-	const handleSubmit = async (e) => {
-		e.preventDefault()
-		if (!form.name || !form.email || !form.phone) return
-		setSubmitting(true)
-		await new Promise((r) => setTimeout(r, 600))
-		setSubmitting(false)
-		setForm({ name: '', email: '', phone: '', interests: '', notes: '' })
-		alert('Thanks for signing up! We\'ll be in touch.')
-	}
+  const handleSubmit = async (e) => {
+    e.preventDefault()
+    if (!form.name || !form.email || !form.phone) return
+    setSubmitting(true)
+    try {
+      const skills = form.interests
+        ? form.interests.split(',').map(s => s.trim()).filter(Boolean)
+        : []
+      await api.post('/api/volunteers', {
+        fullName: form.name,
+        email: form.email,
+        phone: form.phone,
+        skills,
+        motivation: form.notes,
+      })
+      setForm({ name: '', email: '', phone: '', interests: '', notes: '' })
+      alert('Thanks for applying! We\'ll review your application.')
+    } catch (err) {
+      alert(err?.message || 'Failed to submit application')
+    } finally {
+      setSubmitting(false)
+    }
+  }
 
 	return (
 		<section className="px-4 md:px-8 py-8 md:py-12 font-friendly">

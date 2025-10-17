@@ -115,4 +115,38 @@ export async function sendAppointmentStatusEmail({ to, appointment, status }) {
   })
 }
 
+export async function sendVolunteerSubmittedEmail({ to, application }) {
+  const transporter = createTransporter()
+  await transporter.sendMail({
+    from: process.env.EMAIL_FROM || 'no-reply@example.com',
+    to,
+    subject: 'Volunteer application received',
+    html: `
+      <p>Thanks for applying to volunteer!</p>
+      <p>We received your application and our team will review it.</p>
+      <p><b>Name:</b> ${application.fullName}<br/>
+         <b>Phone:</b> ${application.phone}<br/>
+         <b>City:</b> ${application.city || '-'}
+      </p>
+    `,
+  })
+}
+
+export async function sendVolunteerStatusEmail({ to, application, status }) {
+  const transporter = createTransporter()
+  const subject = `Volunteer application ${status}`
+  await transporter.sendMail({
+    from: process.env.EMAIL_FROM || 'no-reply@example.com',
+    to,
+    subject,
+    html: `
+      <p>Your volunteer application status has been updated.</p>
+      <p><b>Status:</b> ${status}<br/>
+         <b>Name:</b> ${application.fullName}<br/>
+         <b>Phone:</b> ${application.phone}
+      </p>
+    `,
+  })
+}
+
 
