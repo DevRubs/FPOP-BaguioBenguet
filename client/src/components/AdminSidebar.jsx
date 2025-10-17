@@ -10,6 +10,7 @@ const adminNavItems = [
   { to: '/admin/volunteers', label: 'Volunteers' },
   { to: '/admin/events', label: 'Events' },
   { to: '/admin/resources', label: 'Resources' },
+  { to: '/admin/youth-archive', label: 'Youth Archive' },
   { to: '/admin/notifications', label: 'Notifications' },
 ]
 
@@ -35,6 +36,7 @@ const ITEM_TO_TAB = {
   'Volunteers': 'Volunteer',
   'Events': 'Dashboard',
   'Resources': 'Resources',
+  'Youth Archive': 'Youth',
   'Notifications': 'Dashboard',
 }
 

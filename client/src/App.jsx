@@ -27,6 +27,7 @@ const AdminEvents = lazy(() => import('./pages/admin/events/AdminEvents.jsx'))
 const AdminResources = lazy(() => import('./pages/admin/resources/AdminResources.jsx'))
 const AdminUsers = lazy(() => import('./pages/admin/users/AdminUsers.jsx'))
 const AdminNotifications = lazy(() => import('./pages/admin/notifications/AdminNotifications.jsx'))
+const AdminYouthArchive = lazy(() => import('./pages/admin/youthArchive/AdminYouthArchive.jsx'))
 import Login from './pages/auth/Login.jsx'
 import Register from './pages/auth/Register.jsx'
 import ForgotPassword from './pages/auth/ForgotPassword.jsx'
@@ -91,6 +92,7 @@ export default function App() {
           <Route path="resources" element={<Suspense fallback={<Loader />}><AdminResources /></Suspense>} />
           <Route path="users" element={<Suspense fallback={<Loader />}><AdminUsers /></Suspense>} />
           <Route path="notifications" element={<Suspense fallback={<Loader />}><AdminNotifications /></Suspense>} />
+          <Route path="youth-archive" element={<Suspense fallback={<Loader />}><AdminYouthArchive /></Suspense>} />
           {/* Admin 404 inside admin shell (optional: custom admin not found) */}
           <Route path="*" element={<Suspense fallback={<Loader />}><AdminDashboard /></Suspense>} />
         </Route>

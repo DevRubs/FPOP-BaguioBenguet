@@ -1,44 +1,7 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { FiCalendar, FiExternalLink, FiChevronLeft, FiChevronRight } from 'react-icons/fi'
 import { SiFacebook, SiInstagram, SiYoutube, SiTiktok, SiX } from 'react-icons/si'
-
-const ARCHIVE = [
-  {
-    id: 'ya-001',
-    title: 'Youth Summit on SRH Education',
-    date: '2024-11-12',
-    url: 'https://www.facebook.com/',
-    note: 'Highlights from our youth-led breakout sessions.',
-  },
-  {
-    id: 'ya-002',
-    title: 'Community Outreach at Session Road',
-    date: '2024-09-21',
-    url: 'https://www.instagram.com/',
-    note: 'Snapshots from the field and partner booths.',
-  },
-  {
-    id: 'ya-003',
-    title: 'Volunteer Orientation Recap',
-    date: '2024-08-03',
-    url: 'https://www.youtube.com/',
-    note: 'A look back at our training day and next steps.',
-  },
-  {
-    id: 'ya-004',
-    title: 'World AIDS Day Activities',
-    date: '2023-12-01',
-    url: 'https://www.tiktok.com/',
-    note: 'Clips from the awareness drive and performances.',
-  },
-  {
-    id: 'ya-005',
-    title: 'SRH Q&A Live Session',
-    date: '2023-06-18',
-    url: 'https://twitter.com/',
-    note: 'Questions answered by our counselors and partners.',
-  },
-]
+import { api } from '../../api.js'
 
 function getPlatform(url) {
   const lower = url.toLowerCase()
@@ -51,17 +14,36 @@ function getPlatform(url) {
 }
 
 export default function YouthArchive() {
-  const items = useMemo(() => {
-    return [...ARCHIVE].sort((a, b) => new Date(b.date) - new Date(a.date))
-  }, [])
-  const pageSize = 4
+  const [items, setItems] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState('')
   const [currentPage, setCurrentPage] = useState(1)
-  const totalItems = items.length
-  const totalPages = Math.max(1, Math.ceil(totalItems / pageSize))
+  const [pagination, setPagination] = useState({ total: 0, pages: 1 })
+  const pageSize = 4
+
+  useEffect(() => {
+    let mounted = true
+    ;(async () => {
+      setLoading(true)
+      setError('')
+      try {
+        const res = await api.get(`/api/youth-archive?page=${currentPage}&limit=${pageSize}`)
+        if (!mounted) return
+        setItems(res.items || [])
+        setPagination(res.pagination || { total: 0, pages: 1 })
+      } catch (err) {
+        if (!mounted) return
+        setError(err?.message || 'Failed to load archive items')
+      } finally {
+        if (mounted) setLoading(false)
+      }
+    })()
+    return () => { mounted = false }
+  }, [currentPage])
+
+  const totalItems = pagination.total
+  const totalPages = pagination.pages
   const safeCurrentPage = Math.min(currentPage, totalPages)
-  const startIndex = (safeCurrentPage - 1) * pageSize
-  const endIndex = Math.min(startIndex + pageSize, totalItems)
-  const pageItems = items.slice(startIndex, endIndex)
 
   return (
     <section className="px-4 md:px-8 py-8 md:py-12 font-friendly">
@@ -73,22 +55,42 @@ export default function YouthArchive() {
 
         {/* Timeline list */}
         <div className="relative">
-          <div className="absolute left-5 top-0 bottom-0 w-px bg-slate-300" />
-          <div className="space-y-6">
-            {pageItems.map((event) => (
-              <div key={event.id} className="relative pl-12">
-                <span className="absolute left-4 top-5 h-3 w-3 rounded-full bg-[#65A3FA] ring-2 ring-white shadow" />
-                <ArchiveCard event={event} />
+          {loading && (
+            <div className="rounded-xl border-2 border-dashed border-slate-300 p-6 text-center text-slate-600 font-semibold">
+              Loading archive items...
+            </div>
+          )}
+          {!loading && error && (
+            <div className="rounded-xl border border-rose-200 bg-rose-50 p-6 text-center text-rose-700 font-semibold">
+              {error}
+            </div>
+          )}
+          {!loading && !error && items.length === 0 && (
+            <div className="rounded-xl border-2 border-dashed border-slate-300 p-6 text-center text-slate-600 font-semibold">
+              No archive items found.
+            </div>
+          )}
+          {!loading && !error && items.length > 0 && (
+            <>
+              <div className="absolute left-5 top-0 bottom-0 w-px bg-slate-300" />
+              <div className="space-y-6">
+                {items.map((event) => (
+                  <div key={event._id} className="relative pl-12">
+                    <span className="absolute left-4 top-5 h-3 w-3 rounded-full bg-[#65A3FA] ring-2 ring-white shadow" />
+                    <ArchiveCard event={event} />
+                  </div>
+                ))}
               </div>
-            ))}
-          </div>
+            </>
+          )}
         </div>
 
         {/* Pagination */}
-        <div className="mt-8 flex flex-col md:flex-row md:items-center gap-4 justify-between">
-          <div className="text-sm text-slate-600 font-semibold">
-            {totalItems === 0 ? 'No posts' : `Showing ${startIndex + 1}–${endIndex} of ${totalItems}`}
-          </div>
+        {!loading && !error && totalPages > 1 && (
+          <div className="mt-8 flex flex-col md:flex-row md:items-center gap-4 justify-between">
+            <div className="text-sm text-slate-600 font-semibold">
+              {totalItems === 0 ? 'No posts' : `Page ${safeCurrentPage} of ${totalPages} (${totalItems} total)`}
+            </div>
           <div className="flex items-center gap-2">
             <button
               disabled={safeCurrentPage <= 1}
@@ -121,6 +123,7 @@ export default function YouthArchive() {
             </button>
           </div>
         </div>
+        )}
       </div>
     </section>
   )
