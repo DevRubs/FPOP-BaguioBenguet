@@ -6,6 +6,8 @@ import cookieParser from 'cookie-parser'
 import healthRouter from './routes/health.routes.js'
 import userRouter from './routes/user.routes.js'
 import authRouter from './routes/auth.routes.js'
+import appointmentRouter from './routes/appointment.routes.js'
+import notificationRouter from './routes/notification.routes.js'
 import { notFound, errorHandler } from './middleware/errorHandler.js'
 
 const app = express()
@@ -44,6 +46,8 @@ app.get('/api/csrf-token', csrfProtection, (req, res) => {
 app.use('/api/health', healthRouter)
 app.use('/api/users', userRouter)
 app.use('/api/auth', authRouter)
+app.use('/api/appointments', appointmentRouter)
+app.use('/api/notifications', notificationRouter)
 
 // 404 and error handlers
 app.use(notFound)

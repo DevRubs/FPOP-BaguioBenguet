@@ -1,30 +1,45 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { FiPlus, FiCalendar, FiClock, FiMapPin, FiChevronRight, FiSearch } from 'react-icons/fi'
+import { api } from '../../api.js'
 
 export default function AppointmentList() {
 	const [query, setQuery] = useState('')
-	const [status, setStatus] = useState('all') // all | upcoming | completed | cancelled
+	const [status, setStatus] = useState('all') // all | pending|confirmed|completed|cancelled
 	const [type, setType] = useState('all') // all | counseling | checkup | followup
+	const [loading, setLoading] = useState(true)
+	const [error, setError] = useState('')
+	const [items, setItems] = useState([])
 
-	const UNIVERSAL_LOCATION = "Room 517, Regus Co., 5th Floor, Abanao Square Mall, Baguio City"
-
-	// Demo data
-	const appointments = [
-		{ id: '1', title: 'General Counseling', type: 'counseling', date: '2025-09-05', time: '10:00 AM', location: UNIVERSAL_LOCATION, status: 'upcoming' },
-		{ id: '2', title: 'SRH Check-up', type: 'checkup', date: '2025-08-15', time: '02:30 PM', location: UNIVERSAL_LOCATION, status: 'completed' },
-		{ id: '3', title: 'Follow-up Session', type: 'followup', date: '2025-08-01', time: '09:00 AM', location: UNIVERSAL_LOCATION, status: 'cancelled' },
-	]
+	useEffect(() => {
+		let mounted = true
+		;(async () => {
+			setLoading(true)
+			setError('')
+			try {
+				const params = new URLSearchParams()
+				if (status !== 'all') params.set('status', status)
+				const res = await api.get(`/api/appointments${params.toString() ? `?${params.toString()}` : ''}`)
+				if (!mounted) return
+				setItems(res.appointments || [])
+			} catch (err) {
+				if (!mounted) return
+				setError(err?.message || 'Failed to load appointments')
+			} finally {
+				if (mounted) setLoading(false)
+			}
+		})()
+		return () => { mounted = false }
+	}, [status])
 
 	const filtered = useMemo(() => {
 		const text = query.trim().toLowerCase()
-		return appointments.filter((a) => {
-			const textOk = !text || a.title.toLowerCase().includes(text) || a.type.toLowerCase().includes(text)
-			const statusOk = status === 'all' || a.status === status
+		return (items || []).filter((a) => {
 			const typeOk = type === 'all' || a.type === type
-			return textOk && statusOk && typeOk
+			const textOk = !text || a.type.toLowerCase().includes(text) || (a.notes || '').toLowerCase().includes(text)
+			return textOk && typeOk
 		})
-	}, [appointments, query, status, type])
+	}, [items, query, type])
 
 	return (
 		<section className="px-4 md:px-8 py-8 md:py-12 font-friendly">
@@ -71,13 +86,23 @@ export default function AppointmentList() {
 
 				{/* List */}
 				<div className="grid grid-cols-1 gap-4">
-					{filtered.length === 0 && (
+					{loading && (
+						<div className="rounded-xl border-2 border-dashed border-slate-300 p-6 text-center text-slate-600 font-semibold">
+							Loading...
+						</div>
+					)}
+					{!loading && error && (
+						<div className="rounded-xl border border-rose-200 bg-rose-50 p-6 text-center text-rose-700 font-semibold">
+							{error}
+						</div>
+					)}
+					{!loading && !error && filtered.length === 0 && (
 						<div className="rounded-xl border-2 border-dashed border-slate-300 p-6 text-center text-slate-600 font-semibold">
 							No appointments found.
 						</div>
 					)}
 					{filtered.map((a) => (
-						<AppointmentCard key={a.id} appt={a} />
+						<AppointmentCard key={a._id} appt={a} />
 					))}
 				</div>
 			</div>
@@ -87,7 +112,9 @@ export default function AppointmentList() {
 
 function statusStyle(status) {
 	switch (status) {
-		case 'upcoming':
+		case 'pending':
+			return 'text-amber-700 bg-amber-50 border-amber-200'
+		case 'confirmed':
 			return 'text-emerald-700 bg-emerald-50 border-emerald-200'
 		case 'completed':
 			return 'text-slate-700 bg-slate-100 border-slate-300'
@@ -103,16 +130,16 @@ function AppointmentCard({ appt }) {
 		<article className="rounded-2xl border border-[#65A3FA] bg-white shadow-lg p-4 md:p-5">
 			<div className="flex items-start justify-between gap-4">
 				<div className="min-w-0">
-					<h3 className="text-xl md:text-2xl font-bold text-slate-900 mb-1">{appt.title}</h3>
+					<h3 className="text-xl md:text-2xl font-bold text-slate-900 mb-1 capitalize">{appt.type}</h3>
 					<div className="flex flex-wrap items-center gap-3 text-sm font-semibold text-slate-600">
-						<span className="inline-flex items-center gap-1"><FiCalendar /> {new Date(appt.date).toLocaleDateString()}</span>
-						<span className="inline-flex items-center gap-1"><FiClock /> {appt.time}</span>
+						<span className="inline-flex items-center gap-1"><FiCalendar /> {new Date(appt.startAt).toLocaleDateString()}</span>
+						<span className="inline-flex items-center gap-1"><FiClock /> {new Date(appt.startAt).toLocaleTimeString()}</span>
 						<span className="inline-flex items-center gap-1"><FiMapPin /> {appt.location}</span>
 						<span className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 ${statusStyle(appt.status)}`}>{appt.status}</span>
 					</div>
 				</div>
 				<div className="flex items-center gap-2 shrink-0">
-					<Link to={`/appointments/${appt.id}`} className="inline-flex items-center gap-1 rounded-md border border-slate-300 bg-white px-3 py-2 text-slate-700 hover:bg-slate-50">
+					<Link to={`/appointments/${appt._id}`} className="inline-flex items-center gap-1 rounded-md border border-slate-300 bg-white px-3 py-2 text-slate-700 hover:bg-slate-50">
 						Details <FiChevronRight />
 					</Link>
 					<button className="inline-flex items-center gap-1 rounded-md border border-slate-300 bg-white px-3 py-2 text-slate-700 hover:bg-slate-50">Reschedule</button>

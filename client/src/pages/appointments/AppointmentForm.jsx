@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { FiArrowLeft, FiCalendar, FiClock, FiMapPin, FiUser, FiPhone, FiChevronDown, FiActivity, FiUserCheck, FiUsers } from 'react-icons/fi'
+import { api } from '../../api.js'
 
 export default function AppointmentForm() {
 	const navigate = useNavigate()
@@ -95,8 +96,19 @@ export default function AppointmentForm() {
 			return
 		}
 		setSubmitting(true)
-		// TODO: POST to backend
-		await new Promise((r) => setTimeout(r, 600))
+		try {
+			await api.post('/api/appointments', {
+				type: form.type,
+				date: form.date, // YYYY-MM-DD
+				time: form.time, // HH:mm (24h)
+				location: form.location,
+				notes: form.notes,
+			})
+		} catch (err) {
+			setError(err?.message || 'Failed to create appointment')
+			setSubmitting(false)
+			return
+		}
 		setSubmitting(false)
 		navigate('/appointments')
 	}
@@ -113,7 +125,7 @@ export default function AppointmentForm() {
 					<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
 						<div className="flex items-start gap-3">
 							<div className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-slate-100 text-slate-700">
-								<FiActivity />
+								<FiActivity size={18} />
 							</div>
 							<div className="min-w-0">
 								<div className="text-lg md:text-xl font-extrabold text-rose-600">HIV Testing</div>
@@ -122,7 +134,7 @@ export default function AppointmentForm() {
 						</div>
 						<div className="flex items-start gap-3">
 							<div className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-slate-100 text-slate-700">
-								<FiUserCheck />
+								<FiUserCheck size={18} />
 							</div>
 							<div className="min-w-0">
 								<div className="text-lg md:text-xl font-extrabold text-blue-600">Consultation</div>
@@ -131,7 +143,7 @@ export default function AppointmentForm() {
 						</div>
 						<div className="flex items-start gap-3">
 							<div className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-slate-100 text-slate-700">
-								<FiUsers />
+								<FiUsers size={18} />
 							</div>
 							<div className="min-w-0">
 								<div className="text-lg md:text-xl font-extrabold text-emerald-600">Family Planning</div>
@@ -146,21 +158,21 @@ export default function AppointmentForm() {
 						<label className="flex flex-col gap-1">
 							<span className="text-sm font-bold text-slate-700">Full name</span>
 							<div className="relative">
-								<FiUser className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+							<FiUser size={18} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
 								<input value={form.name} onChange={update('name')} required className="w-full rounded-md border border-slate-300 bg-white pl-10 pr-3 py-2.5 text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#65A3FA]" placeholder="Your name" />
 							</div>
 						</label>
 						<label className="flex flex-col gap-1">
 							<span className="text-sm font-bold text-slate-700">Phone</span>
 							<div className="relative">
-								<FiPhone className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+							<FiPhone size={18} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
 								<input value={form.phone} onChange={update('phone')} required className="w-full rounded-md border border-slate-300 bg-white pl-10 pr-3 py-2.5 text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#65A3FA]" placeholder="09xx xxx xxxx" />
 							</div>
 						</label>
 						<label className="flex flex-col gap-1">
 							<span className="text-sm font-bold text-slate-700">Date</span>
 							<div className="relative">
-								<FiCalendar className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+							<FiCalendar size={18} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
 								<input
 									type="date"
 									value={form.date}
@@ -184,8 +196,8 @@ export default function AppointmentForm() {
 						<label className="flex flex-col gap-1">
 							<span className="text-sm font-bold text-slate-700">Time</span>
 							<div className="relative">
-								<FiClock className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-								<select
+							<FiClock size={18} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+							<select
 									value={form.time}
 									onChange={(e) => setForm((f) => ({ ...f, time: e.target.value }))}
 									disabled={!selectedDaySchedule || selectedDaySchedule === 'closed'}
@@ -198,14 +210,17 @@ export default function AppointmentForm() {
 										<option key={t} value={t}>{formatTime12(t)}</option>
 									))}
 								</select>
-								<FiChevronDown className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-slate-400" />
-								{form.date && (
-									<div className="mt-1 pl-10 text-[11px] text-slate-500 font-semibold">
-										{selectedDaySchedule === 'closed' && 'Closed on Sundays'}
-										{selectedDaySchedule && selectedDaySchedule !== 'closed' && `Available ${formatTime12(selectedDaySchedule.start)}–${formatTime12(selectedDaySchedule.end)}`}
-									</div>
-								)}
+							<FiChevronDown size={16} className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-slate-400" />
+						</div>
+						{form.date && (
+							<div className="mt-1 pl-10 text-[11px] text-slate-500 font-semibold inline-flex items-center gap-1.5">
+								<FiClock size={12} className="text-slate-400" />
+								<span>
+									{selectedDaySchedule === 'closed' && 'Closed on Sundays'}
+									{selectedDaySchedule && selectedDaySchedule !== 'closed' && `Available ${formatTime12(selectedDaySchedule.start)}–${formatTime12(selectedDaySchedule.end)}`}
+								</span>
 							</div>
+						)}
 						</label>
 					</div>
 
@@ -213,7 +228,7 @@ export default function AppointmentForm() {
 						<label className="flex flex-col gap-1">
 							<span className="text-sm font-bold text-slate-700">Location</span>
 							<div className="relative flex items-center gap-2 rounded-md border border-slate-300 bg-white pl-10 pr-3 py-2.5">
-								<FiMapPin className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+							<FiMapPin size={18} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
 								<span className="text-slate-800 font-semibold">{UNIVERSAL_LOCATION}</span>
 							</div>
 						</label>

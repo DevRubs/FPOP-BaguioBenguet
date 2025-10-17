@@ -1,19 +1,29 @@
 import { useEffect, useRef, useState } from 'react'
 import { FiBell, FiCircle, FiCheck, FiX } from 'react-icons/fi'
+import { api } from '../api.js'
 
 export default function NotificationBell({ initialCount = 0 }) {
   const [open, setOpen] = useState(false)
-  const [items, setItems] = useState(() => ([
-    { id: 'n1', title: 'Appointment confirmed', desc: 'Your appointment is set for Friday 3:00 PM', read: false, ts: Date.now() - 60_000 },
-    { id: 'n2', title: 'New resource available', desc: 'Healthy relationships 101', read: false, ts: Date.now() - 3_600_000 },
-    { id: 'n3', title: 'Welcome!', desc: 'Thanks for joining FPOP online portal', read: true, ts: Date.now() - 86_400_000 },
-  ]))
-  const [count, setCount] = useState(() => Math.max(initialCount, items.filter(i => !i.read).length))
+  const [items, setItems] = useState([])
+  const [count, setCount] = useState(initialCount)
   const panelRef = useRef(null)
 
   useEffect(() => {
     setCount(items.filter(i => !i.read).length)
   }, [items])
+
+  useEffect(() => {
+    let mounted = true
+    ;(async () => {
+      try {
+        const res = await api.get('/api/notifications')
+        if (!mounted) return
+        const mapped = (res.notifications || []).map(n => ({ id: n._id, title: n.title, desc: n.body, read: n.read, ts: n.createdAt }))
+        setItems(mapped)
+      } catch {}
+    })()
+    return () => { mounted = false }
+  }, [])
 
   useEffect(() => {
     function onDocClick(e) {
@@ -35,8 +45,14 @@ export default function NotificationBell({ initialCount = 0 }) {
     }
   }, [open])
 
-  const markAllRead = () => setItems(prev => prev.map(i => ({ ...i, read: true })))
-  const clearOne = (id) => setItems(prev => prev.filter(i => i.id !== id))
+  const markAllRead = async () => {
+    try { await api.post('/api/notifications/mark-all-read') } catch {}
+    setItems(prev => prev.map(i => ({ ...i, read: true })))
+  }
+  const clearOne = async (id) => {
+    try { await api.post(`/api/notifications/${id}/read`) } catch {}
+    setItems(prev => prev.map(i => i.id === id ? { ...i, read: true } : i))
+  }
 
   return (
     <div className="relative" ref={panelRef}>
