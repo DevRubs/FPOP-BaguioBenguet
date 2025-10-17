@@ -36,4 +36,7 @@ logs/
 Thumbs.db
 .vscode/
 .idea/
-'@ | Out-File -Encoding UTF8 .gitignoreDEPLOYMENT_CHECKLIST.md
+
+#dont track
+DEPLOYMENT_CHECKLIST.md
+WEBSITE_OVERVIEW.md

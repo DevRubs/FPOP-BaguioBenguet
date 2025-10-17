@@ -37,4 +37,24 @@ export async function markAllRead(req, res, next) {
   }
 }
 
+export async function getUnreadCount(req, res, next) {
+  try {
+    const unreadCount = await Notification.countDocuments({ user: req.user.id, read: false })
+    res.json({ unreadCount })
+  } catch (err) {
+    next(err)
+  }
+}
+
+export async function deleteMyNotification(req, res, next) {
+  try {
+    const { id } = req.params
+    const deleted = await Notification.findOneAndDelete({ _id: id, user: req.user.id })
+    if (!deleted) return res.status(404).json({ message: 'Not found' })
+    res.json({ message: 'Deleted' })
+  } catch (err) {
+    next(err)
+  }
+}
+
 
