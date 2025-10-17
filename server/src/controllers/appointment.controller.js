@@ -15,7 +15,7 @@ function withinBusinessHours(date, timeTzOffsetMinutes) {
 
 export async function createAppointment(req, res, next) {
   try {
-    const { type, date, time, location, notes } = req.body
+    const { type, date, time, location, notes, phone, name } = req.body
     if (!type || !date || !time || !location) {
       return res.status(400).json({ message: 'type, date, time, location are required' })
     }
@@ -30,9 +30,11 @@ export async function createAppointment(req, res, next) {
 
     const appt = await Appointment.create({
       user: req.user.id,
+      clientName: name || '',
       type,
       startAt,
       location,
+      phone: phone || '',
       notes: notes || '',
     })
 

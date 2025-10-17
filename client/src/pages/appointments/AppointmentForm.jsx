@@ -102,6 +102,8 @@ export default function AppointmentForm() {
 				date: form.date, // YYYY-MM-DD
 				time: form.time, // HH:mm (24h)
 				location: form.location,
+				name: form.name,
+				phone: form.phone,
 				notes: form.notes,
 			})
 		} catch (err) {

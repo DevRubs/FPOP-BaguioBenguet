@@ -80,8 +80,10 @@ export default function AdminAppointments() {
             <tr className="text-left text-slate-600">
               <th className="px-3 py-2 font-semibold">When</th>
               <th className="px-3 py-2 font-semibold">Type</th>
+              <th className="px-3 py-2 font-semibold">Name</th>
               <th className="px-3 py-2 font-semibold">User</th>
-              <th className="px-3 py-2 font-semibold">Location</th>
+              <th className="px-3 py-2 font-semibold">Phone</th>
+              <th className="px-3 py-2 font-semibold">Notes</th>
               <th className="px-3 py-2 font-semibold">Status</th>
               <th className="px-3 py-2 font-semibold">Actions</th>
             </tr>
@@ -100,8 +102,10 @@ export default function AdminAppointments() {
               <tr key={it._id} className="border-t border-slate-100">
                 <td className="px-3 py-2 whitespace-nowrap">{new Date(it.startAt).toLocaleString()}</td>
                 <td className="px-3 py-2 capitalize">{it.type}</td>
-                <td className="px-3 py-2">{it.user?.name || it.user?.email || it.user}</td>
-                <td className="px-3 py-2">{it.location}</td>
+                <td className="px-3 py-2 whitespace-nowrap">{it.clientName || '-'}</td>
+                <td className="px-3 py-2">{it.user?.email || it.user?.name || it.user}</td>
+                <td className="px-3 py-2 whitespace-nowrap">{it.phone || '-'}</td>
+                <td className="px-3 py-2 max-w-xs whitespace-pre-wrap break-words text-slate-700">{it.notes || '-'}</td>
                 <td className="px-3 py-2"><StatusBadge status={it.status} /></td>
                 <td className="px-3 py-2">
                   <div className="inline-flex items-center gap-2">
