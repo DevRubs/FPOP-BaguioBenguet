@@ -83,20 +83,21 @@ export default function AdminVolunteers() {
         </div>
       </div>
 
-      <div className="overflow-auto rounded-2xl border border-[#65A3FA] bg-white shadow-lg">
+      {/* Desktop/Tablet Table View */}
+      <div className="hidden lg:block overflow-auto rounded-2xl border border-[#65A3FA] bg-white shadow-lg">
         <table className="min-w-full table-fixed text-sm">
           <thead className="bg-slate-50 sticky top-0 z-10 shadow-sm">
             <tr className="text-left text-slate-600">
-              <th className="px-4 md:px-6 py-3 font-extrabold w-48">Submitted</th>
-              <th className="px-4 md:px-6 py-3 font-extrabold w-48">Full name</th>
-              <th className="px-4 md:px-6 py-3 font-extrabold w-64">Email</th>
-              <th className="px-4 md:px-6 py-3 font-extrabold w-40">Phone</th>
-              <th className="px-4 md:px-6 py-3 font-extrabold w-40">City</th>
-              <th className="px-4 md:px-6 py-3 font-extrabold w-64">Availability</th>
-              <th className="px-4 md:px-6 py-3 font-extrabold w-64">Skills</th>
-              <th className="px-4 md:px-6 py-3 font-extrabold w-96">Motivation</th>
-              <th className="px-4 md:px-6 py-3 font-extrabold w-40">Status</th>
-              <th className="px-4 md:px-6 py-3 font-extrabold w-64">Actions</th>
+              <th className="px-3 py-2 font-extrabold w-48">Submitted</th>
+              <th className="px-3 py-2 font-extrabold w-48">Full name</th>
+              <th className="px-3 py-2 font-extrabold w-64">Email</th>
+              <th className="px-3 py-2 font-extrabold w-40">Phone</th>
+              <th className="px-3 py-2 font-extrabold w-40">City</th>
+              <th className="px-3 py-2 font-extrabold w-64">Availability</th>
+              <th className="px-3 py-2 font-extrabold w-64">Skills</th>
+              <th className="px-3 py-2 font-extrabold w-96">Motivation</th>
+              <th className="px-3 py-2 font-extrabold w-40">Status</th>
+              <th className="px-3 py-2 font-extrabold w-64">Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -111,16 +112,16 @@ export default function AdminVolunteers() {
             )}
             {items.map((it) => (
               <tr key={it._id} className="border-t border-slate-100 align-top even:bg-slate-50/40 hover:bg-slate-50 transition-colors">
-                <td className="px-4 md:px-6 py-3 whitespace-nowrap text-ellipsis overflow-hidden" title={new Date(it.createdAt).toLocaleString()}>{new Date(it.createdAt).toLocaleString()}</td>
-                <td className="px-4 md:px-6 py-3 whitespace-nowrap text-ellipsis overflow-hidden" title={it.fullName}>{it.fullName}</td>
-                <td className="px-4 md:px-6 py-3 whitespace-nowrap overflow-hidden text-ellipsis" title={it.email}>{it.email}</td>
-                <td className="px-4 md:px-6 py-3 whitespace-nowrap text-ellipsis overflow-hidden" title={it.phone}>{it.phone}</td>
-                <td className="px-4 md:px-6 py-3 whitespace-nowrap text-ellipsis overflow-hidden" title={it.city || '-'}>{it.city || '-'}</td>
-                <td className="px-4 md:px-6 py-3 whitespace-pre-wrap break-words">{it.availability || '-'}</td>
-                <td className="px-4 md:px-6 py-3 whitespace-pre-wrap break-words">{Array.isArray(it.skills) ? it.skills.join(', ') : (it.skills || '-')}</td>
-                <td className="px-4 md:px-6 py-3 whitespace-pre-wrap break-words">{it.motivation || '-'}</td>
-                <td className="px-4 md:px-6 py-3"><StatusBadge status={it.status} /></td>
-                <td className="px-4 md:px-6 py-3 whitespace-nowrap">
+                <td className="px-3 py-2 whitespace-nowrap text-ellipsis overflow-hidden" title={new Date(it.createdAt).toLocaleString()}>{new Date(it.createdAt).toLocaleString()}</td>
+                <td className="px-3 py-2 whitespace-nowrap text-ellipsis overflow-hidden" title={it.fullName}>{it.fullName}</td>
+                <td className="px-3 py-2 whitespace-nowrap overflow-hidden text-ellipsis" title={it.email}>{it.email}</td>
+                <td className="px-3 py-2 whitespace-nowrap text-ellipsis overflow-hidden" title={it.phone}>{it.phone}</td>
+                <td className="px-3 py-2 whitespace-nowrap text-ellipsis overflow-hidden" title={it.city || '-'}>{it.city || '-'}</td>
+                <td className="px-3 py-2 whitespace-pre-wrap break-words">{it.availability || '-'}</td>
+                <td className="px-3 py-2 whitespace-pre-wrap break-words">{Array.isArray(it.skills) ? it.skills.join(', ') : (it.skills || '-')}</td>
+                <td className="px-3 py-2 whitespace-pre-wrap break-words">{it.motivation || '-'}</td>
+                <td className="px-3 py-2"><StatusBadge status={it.status} /></td>
+                <td className="px-3 py-2 whitespace-nowrap">
                   <div className="inline-flex items-center gap-2 flex-wrap">
                     <button
                       onClick={() => updateStatus(it._id, 'approved')}
@@ -149,6 +150,114 @@ export default function AdminVolunteers() {
             ))}
           </tbody>
         </table>
+      </div>
+
+      {/* Mobile Card View */}
+      <div className="lg:hidden space-y-4">
+        {loading && (
+          <div className="rounded-2xl border border-[#65A3FA] bg-white shadow-lg p-6 text-center text-slate-500">
+            Loading...
+          </div>
+        )}
+        {!loading && error && (
+          <div className="rounded-2xl border border-[#65A3FA] bg-white shadow-lg p-6 text-center text-rose-600">
+            {error}
+          </div>
+        )}
+        {!loading && !error && items.length === 0 && (
+          <div className="rounded-2xl border border-[#65A3FA] bg-white shadow-lg p-6 text-center text-slate-500">
+            No applications
+          </div>
+        )}
+        {items.map((it, index) => (
+          <div key={it._id} className="rounded-2xl border border-[#65A3FA] bg-white shadow-lg p-4 space-y-3">
+            {/* Header with name, status, and date */}
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+              <div className="flex-1">
+                <h3 className="font-bold text-slate-900 text-lg">{it.fullName}</h3>
+                <p className="text-sm text-slate-600">{new Date(it.createdAt).toLocaleString()}</p>
+              </div>
+              <div className="flex items-center gap-2">
+                <StatusBadge status={it.status} />
+              </div>
+            </div>
+
+            {/* Contact Information */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div>
+                <label className="text-xs font-semibold text-slate-500 uppercase tracking-wide">Email</label>
+                <p className="text-sm text-slate-900 break-all">{it.email}</p>
+              </div>
+              <div>
+                <label className="text-xs font-semibold text-slate-500 uppercase tracking-wide">Phone</label>
+                <p className="text-sm text-slate-900">{it.phone}</p>
+              </div>
+              {it.city && (
+                <div className="sm:col-span-2">
+                  <label className="text-xs font-semibold text-slate-500 uppercase tracking-wide">City</label>
+                  <p className="text-sm text-slate-900">{it.city}</p>
+                </div>
+              )}
+            </div>
+
+            {/* Availability */}
+            {it.availability && (
+              <div>
+                <label className="text-xs font-semibold text-slate-500 uppercase tracking-wide">Availability</label>
+                <p className="text-sm text-slate-900 whitespace-pre-wrap">{it.availability}</p>
+              </div>
+            )}
+
+            {/* Skills */}
+            {it.skills && (
+              <div>
+                <label className="text-xs font-semibold text-slate-500 uppercase tracking-wide">Skills</label>
+                <p className="text-sm text-slate-900">{Array.isArray(it.skills) ? it.skills.join(', ') : it.skills}</p>
+              </div>
+            )}
+
+            {/* Motivation */}
+            {it.motivation && (
+              <div>
+                <label className="text-xs font-semibold text-slate-500 uppercase tracking-wide">Motivation</label>
+                <p className="text-sm text-slate-900 whitespace-pre-wrap">{it.motivation}</p>
+              </div>
+            )}
+
+            {/* Actions */}
+            <div className="pt-2 border-t border-slate-100">
+              <div className="flex flex-wrap gap-2">
+                <button
+                  onClick={() => updateStatus(it._id, 'approved')}
+                  disabled={Boolean(updatingById[it._id]) || it.status !== 'pending'}
+                  className={`flex-1 sm:flex-none rounded-full border px-4 py-2 text-sm font-semibold ${it.status === 'pending' ? 'border-emerald-200 bg-emerald-50 text-emerald-700' : 'border-emerald-100 bg-emerald-50/70 text-emerald-400'} ${updatingById[it._id] ? 'opacity-60 cursor-not-allowed' : ''}`}
+                >
+                  {updatingById[it._id] ? 'Updating…' : 'Approve'}
+                </button>
+                <button
+                  onClick={() => updateStatus(it._id, 'rejected')}
+                  disabled={Boolean(updatingById[it._id]) || it.status !== 'pending'}
+                  className={`flex-1 sm:flex-none rounded-full border px-4 py-2 text-sm font-semibold ${it.status === 'pending' ? 'border-rose-200 bg-rose-50 text-rose-700' : 'border-rose-200 bg-rose-50/70 text-rose-400'} ${updatingById[it._id] ? 'opacity-60 cursor-not-allowed' : ''}`}
+                >
+                  {updatingById[it._id] ? 'Updating…' : 'Reject'}
+                </button>
+                <button
+                  onClick={() => updateStatus(it._id, 'pending')}
+                  disabled={Boolean(updatingById[it._id]) || it.status === 'pending'}
+                  className={`flex-1 sm:flex-none rounded-full border px-4 py-2 text-sm font-semibold ${it.status === 'pending' ? 'border-slate-200 bg-slate-100/70 text-slate-400' : 'border-slate-300 bg-slate-100 text-slate-700'} ${updatingById[it._id] ? 'opacity-60 cursor-not-allowed' : ''}`}
+                >
+                  {updatingById[it._id] ? 'Updating…' : 'Set Pending'}
+                </button>
+              </div>
+            </div>
+            {/* Separator line - only show if not the last item */}
+            {index < items.length - 1 && (
+              <div className="pt-4">
+                <div className="border-t border-slate-200"></div>
+              </div>
+            )}
+          </div>
+        ))}
       </div>
     </div>
   )
