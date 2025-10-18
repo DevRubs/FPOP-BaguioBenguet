@@ -11,7 +11,6 @@ const adminNavItems = [
   { to: '/admin/events', label: 'Events' },
   { to: '/admin/resources', label: 'Resources' },
   { to: '/admin/youth-archive', label: 'Youth Archive' },
-  { to: '/admin/notifications', label: 'Notifications' },
 ]
 
 // true => allowed, false => denied
@@ -37,7 +36,6 @@ const ITEM_TO_TAB = {
   'Events': 'Dashboard',
   'Resources': 'Resources',
   'Youth Archive': 'Youth',
-  'Notifications': 'Dashboard',
 }
 
 function canRoleAccessTab(role, tab) {
