@@ -10,6 +10,7 @@ import appointmentRouter from './routes/appointment.routes.js'
 import notificationRouter from './routes/notification.routes.js'
 import volunteerRouter from './routes/volunteer.routes.js'
 import youthArchiveRouter from './routes/youthArchive.routes.js'
+import eventRouter from './routes/event.routes.js'
 import { notFound, errorHandler } from './middleware/errorHandler.js'
 
 const app = express()
@@ -52,6 +53,7 @@ app.use('/api/appointments', appointmentRouter)
 app.use('/api/notifications', notificationRouter)
 app.use('/api/volunteers', volunteerRouter)
 app.use('/api/youth-archive', youthArchiveRouter)
+app.use('/api/events', eventRouter)
 
 // 404 and error handlers
 app.use(notFound)
